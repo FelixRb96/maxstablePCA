@@ -31,7 +31,7 @@
 #'  0.3952988, 4.416034,  4.416034,
 #'  4.9373416,  4.937342,  1.698470,
 #'  0.8265868,  8.180792,  8.180792
-#' ), 3, 3)
+#' ), 4, 3)
 #'
 #' # call function for 3 variate random vector sample
 #' stable_tail_dependence(c(1,2,3), 3, data)
