@@ -4,15 +4,17 @@
 \alias{summary.max_stable_prcomp}
 \title{Print summary of a max_stable_prcomp object.}
 \usage{
-\method{summary}{max_stable_prcomp}(fit)
+\method{summary}{max_stable_prcomp}(object, ...)
 }
 \arguments{
-\item{fit, }{max_stable_prcomp object. Data should be
+\item{object, }{max_stable_prcomp object. Data should be
 assumed to follow the same distribution as the data used in
 max_stable_prcomp.}
+
+\item{...}{additional unused arguments.}
 }
 \description{
-TODO
+Print summary of a max_stable_prcomp object.
 }
 \examples{
 # Alternatively call via the generic function summary

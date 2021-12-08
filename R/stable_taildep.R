@@ -19,7 +19,8 @@
 #' @param data, array where the rows are representing the observations and 
 #' the columns are the points sampled from. The columns are assumed to 
 #' have \emph{unit Frechet} marginals.
-#' @return TODO
+#' @return Non negative float, representing the stable tail depndence 
+#' estimator evaluated at parameter x. 
 #' @seealso [maxstablePCA::transform_unitfrechet()] to make sure the marginal 
 #' distributions of the columns are standardized. 
 #' @export
@@ -37,10 +38,10 @@
 stable_tail_dependence <- function(x, s, data) {
   #calculate norms and choose relevant rows
   if(is.vector(x)) {
-    if(length(x) != ncol(data)) stop(paste("x should be of length", ncol(dat), "but is of length", length(x)))
+    if(length(x) != ncol(data)) stop(paste("x should be of length", ncol(data), "but is of length", length(x)))
     return(stable_tail_dependence_univ(x, s, data))
   } else{
-    std_s_data <- function(x) stable_tail_dependence_univ(x, s, dat)
+    std_s_data <- function(x) stable_tail_dependence_univ(x, s, data)
     return(apply(x, 1, std_s_data))
   }
 }

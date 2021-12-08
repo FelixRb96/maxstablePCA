@@ -4,7 +4,7 @@
 \alias{max_stable_prcomp}
 \title{Calculate max-stable PCA with dimension p for given dataset}
 \usage{
-max_stable_prcomp(data, p, s = 3, x0 = NULL)
+max_stable_prcomp(data, p, s = 3, n_initial_guesses = 150, ...)
 }
 \arguments{
 \item{data, }{array or data.frame of n observations of d variables
@@ -18,18 +18,44 @@ combinations in the compressed representation.}
 \item{s}{(default = 3), numeric greater than 0. Hyperparameter for the
 stable tail dependence estimator used in tn the calculation.}
 
-\item{x0}{(default = NULL), initial value for optimizer. Set with
-extreme caution and only with good knowledge of the minimizationb problem.
-NOTE: will be moved to ...}
+\item{n_initial_guesses}{number of guesses to choose a valid initial value 
+for optimization from. This procedure uses a pseudo random number generator so 
+setting a seed is necessary for reproducibility.}
+
+\item{...}{additional parameters passed to \code{link{nloptr::slsqp()}}}
 }
 \value{
 object of class max_stable_prcomp with slots
-TODO
+p, inserted value of dimension,
+decoder_matrix, an array of shape (d,p), where the columns represent the basis of the max-linear space for the reconstruction.
+encoder_matrix, an array of shape (p,d), where the rows represent the loadings as max-linear combinations for the compressed representation.
+reconstr_matrix, an array of shape (d,d), where the matrix is the mapping of the data to the optimal max-linear combinations of columns of decoder_matrix.
+loss_fctn_value, float representing the final loss function value of the fit.
+optim_conv_status, integer indicating the convergence of the optimizer if greater than 0.
 }
 \description{
-Find
+Find a p dimensional max-linear subspace that describes the data 
+best by trying to find optimal max-linear combinations.
+}
+\details{
+For details on the statistical procedure it is advised to 
+read the articles TODO.
 }
 \examples{
-# TODO
-1 + 1
+# generate some data with the desired margins
+dat <- matrix(evd::rfrechet(300), 100, 3)
+maxPCA <- max_stable_prcomp(dat, 2)
+
+# look at summary to obtain further information about 
+# loadings the space spanned and loss function
+summary(maxPCA)
+
+# transfrom data to compressed representation
+# for a representation that is p-dimensional,
+# preserves the max-stable structure and is numeric solution to 
+# optimal reconstruction.
+compr <- compress(maxPCA, dat)
+
+# For visual examination reconstruct original vector from compressed representation
+rec <- reconstruct(maxPCA, compr)
 }

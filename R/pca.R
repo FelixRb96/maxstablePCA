@@ -2,7 +2,11 @@
 
 #' Calculate max-stable PCA with dimension p for given dataset
 #'
-#' Find
+#' Find a p dimensional max-linear subspace that describes the data 
+#' best by trying to find optimal max-linear combinations. 
+#' 
+#' For details on the statistical procedure it is advised to 
+#' read the articles TODO. 
 #'
 #' @param data, array or data.frame of n observations of d variables
 #' with unit Frechet margins. The max-stable PCA is fitted to
@@ -10,31 +14,41 @@
 #' @param p, integer between 1 and ncol(data). Determines
 #' the dimension of the encoded state, i.e. the number of max-linear
 #' combinations in the compressed representation.
+#' @param n_initial_guesses number of guesses to choose a valid initial value 
+#' for optimization from. This procedure uses a pseudo random number generator so 
+#' setting a seed is necessary for reproducibility. 
 #' @param s (default = 3), numeric greater than 0. Hyperparameter for the
 #' stable tail dependence estimator used in tn the calculation.
-#' @param x0 (default = NULL), initial value for optimizer. Set with
-#' extreme caution and only with good knowledge of the minimizationb problem.
-#' NOTE: will be moved to ...
+#' @param ... additional parameters passed to \code{link{nloptr::slsqp()}}
 #' @return object of class max_stable_prcomp with slots
-#' TODO
+#' p, inserted value of dimension,
+#' decoder_matrix, an array of shape (d,p), where the columns represent the basis of the max-linear space for the reconstruction.
+#' encoder_matrix, an array of shape (p,d), where the rows represent the loadings as max-linear combinations for the compressed representation.
+#' reconstr_matrix, an array of shape (d,d), where the matrix is the mapping of the data to the optimal max-linear combinations of columns of decoder_matrix.
+#' loss_fctn_value, float representing the final loss function value of the fit.
+#' optim_conv_status, integer indicating the convergence of the optimizer if greater than 0.
 #' @export
 #' @examples
-#' # TODO
-#' 1 + 1
-max_stable_prcomp <- function(data, p, s = 3, x0 = NULL) {
+#' # generate some data with the desired margins
+#' dat <- matrix(evd::rfrechet(300), 100, 3)
+#' maxPCA <- max_stable_prcomp(dat, 2)
+#' 
+#' # look at summary to obtain further information about 
+#' # loadings the space spanned and loss function
+#' summary(maxPCA)
+#' 
+#' # transfrom data to compressed representation
+#' # for a representation that is p-dimensional,
+#' # preserves the max-stable structure and is numeric solution to 
+#' # optimal reconstruction.
+#' compr <- compress(maxPCA, dat)
+#' 
+#' # For visual examination reconstruct original vector from compressed representation
+#' rec <- reconstruct(maxPCA, compr)
+max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, ...) {
 
   data <- as.matrix(data)
   d <- dim(data)[2]
-
-  # setting up an intial guess thats always feasible
-  if(is.null(x0)) {
-    x0 <- rep(0, 2 * d * p)
-    for(i in 1:p) {
-      x0[(i-1)*d + i] <- 1
-      x0[(d * (i-1) + (p+1)):(d*i)] <- 1/p
-      x0[d*p + (i-1)*p + i] <- 1
-    }
-  }
 
   # setting up target function with data to be callable
   target_fn <- function(x) target_fn_data(x, d, p, s, data)
@@ -45,8 +59,25 @@ max_stable_prcomp <- function(data, p, s = 3, x0 = NULL) {
   # setting up sharper inequlity constraints
   constr_hin <- function(x) constraint_ineq(x, d, p)
 
+  # alternative way to set up initial value
+  searching_x0 <- T
+  x0 <- NA
 
-  optimizer_result <- nloptr::slsqp(x0, target_fn, hin = constr_hin, lower = lower)
+  while(searching_x0) {
+    x0_cands <- matrix(runif(n_initial_guesses * 2 * d * p, 0.1, 1.15), n_initial_guesses, 2 * d * p)
+    x0_valid <- x0_cands[apply(x0_cands, 1, function(x) all(constr_hin(x) >= 0)), ]
+    if(length(x0_valid) > 0) {
+      searching_x0 <- F
+      if(length(x0_valid) > 1) {
+        targetvals <- apply(x0_valid, 1, target_fn)
+        x0 <- x0_valid[which(targetvals == min(targetvals)), ]
+      } else {
+        x0 <- x0_valid
+      }
+    }
+  }
+
+  optimizer_result <- nloptr::slsqp(x0, target_fn, hin = constr_hin, lower = lower, ...)
 
   decoder_matrix <- matrix(optimizer_result$par[1:(d*p)], d, p)
   encoder_matrix <- matrix(optimizer_result$par[(d*p + 1):(2 * d * p)], p, d)
@@ -54,6 +85,7 @@ max_stable_prcomp <- function(data, p, s = 3, x0 = NULL) {
 
   result <- list(
                  p = p,
+                 d = nrow(reconstr_matrix),
                  decoder_matrix = decoder_matrix,
                  encoder_matrix = encoder_matrix,
                  reconstr_matrix = reconstr_matrix,
@@ -87,8 +119,22 @@ max_stable_prcomp <- function(data, p, s = 3, x0 = NULL) {
 #' further analysis.
 #' @export
 #' @examples
-#' # TODO
-#' 1 + 1
+#' # generate some data with the desired margins
+#' dat <- matrix(evd::rfrechet(300), 100, 3)
+#' maxPCA <- max_stable_prcomp(dat, 2)
+#' 
+#' #  look at summary to obtain further information about 
+#' # loadings the space spanned and loss function
+#' summary(maxPCA)
+#' 
+#' # transfrom data to compressed representation
+#' # for a representation that is p-dimensional,
+#' # preserves the max-stable structure and is numeric solution to 
+#' # optimal reconstruction.
+#' compr <- compress(maxPCA, dat)
+#' 
+#' # For visual examination reconstruct original vector from compressed representation
+#' rec <- reconstruct(maxPCA, compr)
 compress <- function(fit, data) {
   # TODO: take care of vectors!
   return(t(maxmatmul(fit$encoder_matrix, t(data))))
@@ -101,12 +147,11 @@ compress <- function(fit, data) {
 #' Can be used for visual assessment of the fit if p should be chosen
 #' differently.
 #'
-#'
 #' @param fit, max_stable_prcomp object. Data should be
 #' assumed to follow the same distribution as the data used in
 #' max_stable_prcomp.
 #' @param compressed_data a compressed representation of 
-#' data obtained by calling \code[compress(fit, data)} 
+#' data obtained by calling \code{compress(fit, data)} 
 #' intended to be calculated with the same fit.
 #' @return array of dimension nrow(compressed_data), d
 #' An optimal reconstruction with max-linear combinations 
@@ -116,8 +161,22 @@ compress <- function(fit, data) {
 #' maxstablePCA::maxmatmul()]
 #' @export
 #' @examples
-#' # TODO
-#' 1 + 1
+#' # generate some data with the desired margins
+#' dat <- matrix(evd::rfrechet(300), 100, 3)
+#' maxPCA <- max_stable_prcomp(dat, 2)
+#' 
+#' #  look at summary to obtain further information about 
+#' # loadings the space spanned and loss function
+#' summary(maxPCA)
+#' 
+#' # transfrom data to compressed representation
+#' # for a representation that is p-dimensional,
+#' # preserves the max-stable structure and is numeric solution to 
+#' # optimal reconstruction.
+#' compr <- compress(maxPCA, dat)
+#' 
+#' # For visual examination reconstruct original vector from compressed representation
+#' rec <- reconstruct(maxPCA, compr)
 reconstruct <- function(fit, compressed_data) {
   # TODO: take care of vectors!
   return(t(maxmatmul(fit$decoder_matrix, t(compressed_data))))
@@ -125,19 +184,20 @@ reconstruct <- function(fit, compressed_data) {
 
 #' Print summary of a max_stable_prcomp object.
 #'
-#' TODO
+#' 
 #'
-#' @param fit, max_stable_prcomp object. Data should be
+#' @param object, max_stable_prcomp object. Data should be
 #' assumed to follow the same distribution as the data used in
 #' max_stable_prcomp.
+#' @param ... additional unused arguments.
 #' @export
 #' @examples
 #' # Alternatively call via the generic function summary
 #' # TODO: generic fit example
 #' # summary.max_stable_prcomp(fit)
-summary.max_stable_prcomp <- function(fit) {
-  # TODO: nice formatting with cat or sth.
-  print(fit)
+summary.max_stable_prcomp <- function(object, ...) {
+  print(object)
+
 }
 
 
@@ -175,7 +235,8 @@ constraint_nonneg <- function(x) return(x)
 constraint_ineq <- function(x, d, p) {
   H <- create_H(x, d, p)
   constr_upper <- d - rowSums(H)
-  constr_lower <- rowSums(H) - 1
-  return(c(constr_lower, constr_upper))
+  # remove lower constraint for the random initialization
+  # constr_lower <- rowSums(H) - 1
+  return(constr_upper)
 }
 

@@ -4,23 +4,54 @@
 \alias{transform_orig_margins}
 \title{Transform the columns of a transformed dataset to original margins}
 \usage{
-transform_orig_margins(transformed_data, orig_data, empirical = TRUE)
+transform_orig_margins(transformed_data, orig_data, empirical = TRUE, ...)
 }
 \arguments{
-\item{A}{TODO}
+\item{transformed_data, }{arraylike data of dimension n, d}
 
-\item{B}{TODO}
+\item{orig_data, }{arraylike data of dimension n , d}
+
+\item{empirical, }{logical to indicate the transformation method. If \code{TRUE} the data
+is transformed using the empical distribution function. If \code{FALSE}, the 
+data is transformed using a MLE fit of a generalized extreme value distribution to the data.
+Using the empirical distribution function does not require the data to have approximately
+max-stable distribution, thus is set to default.}
+
+\item{..., }{additional arguments for \code{mev::fit.gev()}}
 }
 \value{
-TODO
+array of dimension n,d with transformed columns of transformed_data that follow approximately the same
+marginal distribution of orig_data.
 }
 \description{
-Lore ipsum
+Since the dataset is intended to be transformed for PCA,
+this function takes a dataset transformed_data and 
+transforms the margins to the marginal distribution of 
+the dataset orig_data.
+}
+\details{
+Additional care is needed when using the non empirical method, since for large 
+datasets the optimizer may not converge for some columns and the assumption of a GEV
+on the marginals should be carefully checked.
 }
 \examples{
-# TODO
-1 + 1
+# create a sample 
+dat <- rnorm(1000)
+transoformed_dat <- transform_unitfrechet(dat)
+retransformed_dat <- transform_orig_margins(transoformed_dat, dat)
+
+# create a boxplot of retransformation to visually examine distribution
+boxplot(retransformed_dat)
+plot(stats::ecdf(retransformed_dat))
+
+# Transform columns of a data matrix
+dat2 <- matrix(rnorm(3000), 1000, 3)
+transformed_dat2 <- transform_unitfrechet(dat2)
+retransformed_dat2 <- transform_orig_margins(transformed_dat2, dat2)
 }
 \seealso{
-[maxstablePCA::max_stable_prcomp()] for information about why to transform data.
+[maxstablePCA::max_stable_prcomp(), mev__fit.gev()] for information about why to transform data.
+
+[maxstablePCA::max_stable_prcomp(), maxstablePCA::transform_unitfrechet(), mev::fit.gev())] for information about why to transform data
+and the MLE method used internally.
 }

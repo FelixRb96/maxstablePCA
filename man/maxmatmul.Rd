@@ -30,5 +30,10 @@ A <- matrix(c(1,2,3,4,5,6), 2, 3)
 B <- matrix(c(1,2,1,2,1,2), 3, 2)
 
 # calling the function 
-maxmatmul(A, B)
+m1 <- maxmatmul(A, B)
+
+# can be used for matrix-vector multiplication as well
+v <- c(7,4,7)
+m2 <- maxmatmul(A, v)
+m3 <- maxmatmul(v,v)
 }

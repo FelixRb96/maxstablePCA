@@ -4,7 +4,7 @@
 \alias{transform_unitfrechet}
 \title{Transform the columns of a dataset to unit Frechet margins}
 \usage{
-transform_unitfrechet(data, empirical = TRUE)
+transform_unitfrechet(data, empirical = TRUE, ...)
 }
 \arguments{
 \item{data, }{array or vector with the data which columns are to be transformed}
@@ -14,18 +14,33 @@ is transformed using the empical distribution function. If \code{FALSE}, the
 data is transformed using a MLE fit of a generalized extreme value distribution to the data.
 Using the empirical distribution function does not require the data to have approximately
 max-stable distribution, thus is set to default.}
+
+\item{..., }{additional arguments for \code{mev::fit.gev()}}
 }
 \value{
 array or vector of same shape and type as data with the transformed data with unit 
-Freceht margins-
+Frechet margins-
 }
 \description{
-Lore ipsum
+Transforms columns of dataset to unit Frechet margins, to ensure
+the theoretical requirements are satisfied for the application of
+\code{\link{max_stable_prcomp}}.
+}
+\details{
+Additional care is needed when using the non empirical method, since for large 
+datasets the optimizer may not converge for some columns and the assumption of a GEV
+on the marginals should be carefully checked.
 }
 \examples{
-# TODO
-1 + 1
+# sample some data
+dat <- rnorm(1000)
+transformed_dat <- transform_unitfrechet(dat)
+
+# Look at a plot of distribution
+boxplot(transformed_dat)
+plot(stats::ecdf(transformed_dat))
 }
 \seealso{
-[maxstablePCA::max_stable_prcomp()] for information about why to transform data.
+[maxstablePCA::max_stable_prcomp(), maxstablePCA::transform_orig_margins(), mev::fit.gev())] for information about why to transform data
+and the MLE method used internally.
 }

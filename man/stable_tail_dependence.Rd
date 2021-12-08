@@ -16,7 +16,8 @@ the columns are the points sampled from. The columns are assumed to
 have \emph{unit Frechet} marginals.}
 }
 \value{
-TODO
+Non negative float, representing the stable tail depndence 
+estimator evaluated at parameter x.
 }
 \description{
 The stable tail dependence is a function describing the 

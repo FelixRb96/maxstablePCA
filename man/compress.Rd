@@ -27,8 +27,22 @@ This is done by taking the max-matrix product of the data
 and the encoder matrix from the fit.
 }
 \examples{
-# TODO
-1 + 1
+# generate some data with the desired margins
+dat <- matrix(evd::rfrechet(300), 100, 3)
+maxPCA <- max_stable_prcomp(dat, 2)
+
+#  look at summary to obtain further information about 
+# loadings the space spanned and loss function
+summary(maxPCA)
+
+# transfrom data to compressed representation
+# for a representation that is p-dimensional,
+# preserves the max-stable structure and is numeric solution to 
+# optimal reconstruction.
+compr <- compress(maxPCA, dat)
+
+# For visual examination reconstruct original vector from compressed representation
+rec <- reconstruct(maxPCA, compr)
 }
 \seealso{
 [maxstablePCA::max_stable_prcomp(), maxstablePCA::maxmatmul()]
