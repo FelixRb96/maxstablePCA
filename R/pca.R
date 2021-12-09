@@ -114,7 +114,6 @@ max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, ...) {
         searching_x0 <- F
         if(length(x0_valid) > 1) {
           targetvals <- apply(x0_valid, 1, target_fn)
-          print(paste("Number of valid inits:", length(targetvals)))
           x0 <- x0_valid[which(targetvals == min(targetvals)), ]
         } else {
           x0 <- x0_valid
