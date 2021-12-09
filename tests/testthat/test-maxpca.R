@@ -9,7 +9,12 @@ set.seed <- 12345
 A <- matrix(c(1,0,0.5, 0,1, 0.5), 3, 2)
 z <- matrix(rfrechet(20000), 2, 10000)
 sample <- t(maxmatmul(A, z))
-maxstabPCA <- max_stable_prcomp(sample, 2)
+maxstabPCA1 <- max_stable_prcomp(sample, 1)
+maxstabPCA2 <- max_stable_prcomp(sample, 2)
+maxstabPCA3 <- max_stable_prcomp(sample, 3)
+
+maxstabPCA <- maxstabPCA2
+
 zz <- matrix(rfrechet(200), 100, 2)
 compr <- compress(maxstabPCA, zz)
 reconstr <- reconstruct(maxstabPCA, compr)

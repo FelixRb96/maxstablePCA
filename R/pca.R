@@ -61,76 +61,91 @@ max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, ...) {
 
   x0 <- NA
 
-  # norm data and calculate distances between points from data on 1-norm sphere
-  data_normed <- t(apply(data, 1, function(x) x / sum(abs(x))))
-  distmat <- matrix(0, nrow(data_normed), nrow(data_normed))
-  for(i in 1:nrow(data_normed)) {
-    for(j in 1:i) {
-      distmat[i,j] <- sum(abs(data_normed[i,] - data_normed[j,]))
-    }
-  }
 
-  # search for p data entries which have a big distance from one another
-  counter <- 0
-  indices_base <- c()
-  while(counter < p) {
-    indices <- which(distmat == max(distmat), arr.ind = T)
-    distmat[indices[1], indices[2]] <- 0
-    for(ind in indices) {
-      if(!(ind %in% indices_base) & length(indices_base) < p) {
-        indices_base <- c(indices_base, ind)
-        counter <- counter + 1
+  # take care of the case p = 1 later where distances are not relevant
+  if(p > 1) {
+
+    # mae sure the distance matrix does not get too large
+    data_dist <- data
+    if(nrow(data) > 5000) {
+      print("prining data for creation of starting value")
+      data_dist <- data[sample(1:nrow(data), 5000), ]
+    }
+
+
+    # norm data and calculate distances between points from data on 1-norm sphere
+    data_normed <- t(apply(data_dist, 1, function(x) x / sum(abs(x))))
+    distmat <- matrix(0, nrow(data_normed), nrow(data_normed))
+    for(i in 1:nrow(data_normed)) {
+      for(j in 1:i) {
+        distmat[i,j] <- sum(abs(data_normed[i,] - data_normed[j,]))
       }
     }
-  }
 
-
-  # create the base columns for the first d*p entries of inital value
-  data_entries <- data[indices_base, ]
-  base_columns <- apply(data_entries, 1, function(x) x / max(abs(x)))
-
-  # search for best starting point with the specified max-space 
-  # filling up the remaining d*p columns with uniform entries
-  searching_x0 <- T
-
-  while(searching_x0) {
-    x0_cands <- matrix(stats::runif(n_initial_guesses * 2 * d * p, 0.1, 1.15), n_initial_guesses, 2 * d * p)
-    x0_cands[, 1:(d*p)] <- matrix(base_columns, n_initial_guesses, d * p, byrow = T)
-
-    x0_valid <- x0_cands[apply(x0_cands, 1, function(x) all(constr_hin(x) >= 0)), ]
-    if(length(x0_valid) > 0) {
-      searching_x0 <- F
-      if(length(x0_valid) > 1) {
-        targetvals <- apply(x0_valid, 1, target_fn)
-        print(paste("Number of valid inits:", length(targetvals)))
-        x0 <- x0_valid[which(targetvals == min(targetvals)), ]
-      } else {
-        x0 <- x0_valid
+    # search for p data entries which have a big distance from one another
+    counter <- 0
+    indices_base <- c()
+    while(counter < p) {
+      indices <- which(distmat == max(distmat), arr.ind = T)
+      distmat[indices[1], indices[2]] <- 0
+      for(ind in indices) {
+        if(!(ind %in% indices_base) & length(indices_base) < p) {
+          indices_base <- c(indices_base, ind)
+          counter <- counter + 1
+        }
       }
     }
+
+
+    # create the base columns for the first d*p entries of inital value
+    data_entries <- data[indices_base, ]
+    base_columns <- apply(data_entries, 1, function(x) x / max(abs(x)))
+
+    # search for best starting point with the specified max-space 
+    # filling up the remaining d*p columns with uniform entries
+    searching_x0 <- T
+
+    while(searching_x0) {
+      x0_cands <- matrix(stats::runif(n_initial_guesses * 2 * d * p, 0.1, 1.15), n_initial_guesses, 2 * d * p)
+      x0_cands[, 1:(d*p)] <- matrix(base_columns, n_initial_guesses, d * p, byrow = T)
+
+      x0_valid <- x0_cands[apply(x0_cands, 1, function(x) all(constr_hin(x) >= 0)), ]
+      if(length(x0_valid) > 0) {
+        searching_x0 <- F
+        if(length(x0_valid) > 1) {
+          targetvals <- apply(x0_valid, 1, target_fn)
+          print(paste("Number of valid inits:", length(targetvals)))
+          x0 <- x0_valid[which(targetvals == min(targetvals)), ]
+        } else {
+          x0 <- x0_valid
+        }
+      }
+    }
+  } else {
+    x0 <- c(base::colMeans(data), rep(1, d))
   }
 
-# call the optimizer to calculate a solution candidate
-optimizer_result <- nloptr::slsqp(x0, target_fn, hin = constr_hin, lower = lower, ...)
+  # call the optimizer to calculate a solution candidate
+  optimizer_result <- nloptr::slsqp(x0, target_fn, hin = constr_hin, lower = lower, ...)
 
-# set up the necessary matrices and objects for the return value
-decoder_matrix <- matrix(optimizer_result$par[1:(d*p)], d, p)
-encoder_matrix <- matrix(optimizer_result$par[(d*p + 1):(2 * d * p)], p, d)
-reconstr_matrix <- maxmatmul(decoder_matrix, encoder_matrix)
+  # set up the necessary matrices and objects for the return value
+  decoder_matrix <- matrix(optimizer_result$par[1:(d*p)], d, p)
+  encoder_matrix <- matrix(optimizer_result$par[(d*p + 1):(2 * d * p)], p, d)
+  reconstr_matrix <- maxmatmul(decoder_matrix, encoder_matrix)
 
-result <- list(
-               p = p,
-               d = nrow(reconstr_matrix),
-               decoder_matrix = decoder_matrix,
-               encoder_matrix = encoder_matrix,
-               reconstr_matrix = reconstr_matrix,
-               loss_fctn_value = optimizer_result$value - d,
-               optim_conv_status = optimizer_result$convergence,
-               s = s
-)
+  result <- list(
+                 p = p,
+                 d = nrow(reconstr_matrix),
+                 decoder_matrix = decoder_matrix,
+                 encoder_matrix = encoder_matrix,
+                 reconstr_matrix = reconstr_matrix,
+                 loss_fctn_value = optimizer_result$value - d,
+                 optim_conv_status = optimizer_result$convergence,
+                 s = s
+  )
 
-class(result) <- "max_stable_prcomp"
-return(result)
+  class(result) <- "max_stable_prcomp"
+  return(result)
 }
 
 # --- helper functions to obtain latent space representations and transofrm data ---
