@@ -14,9 +14,10 @@ obtain a resonable compact description of the data.
 
 For a better feeling of what this algorithm does, please consider looking at the following links providing example data analyses and simulation studies
 
-* TODO
+* Related GitHub repository: https://github.com/FelixRb96/maxstablePCA_examples
+* TODO: Rdocumentation, maybe some towardsdatascience blog or sth. 
 
 ### References
 
-* TODO
+* A semi-group approach to Principal Component Analysis, Schlather M., Reinbott F., arxiv preprint, https://arxiv.org/pdf/2112.04026.pdf, 2021
 
