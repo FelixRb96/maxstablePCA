@@ -1,3 +1,6 @@
+[![R build
+status](https://github.com/FelixRb96/maxstablePCA/workflows/R-CMD-check/badge.svg)](https://github.com/FelixRb96/maxstablePCA/actions?workflow=R-CMD-check)
+
 # maxstablePCA
 
 A package for dimensionality reduction of multivariate extremes using the idea of PCA to 
