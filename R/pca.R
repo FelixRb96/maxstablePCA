@@ -45,13 +45,17 @@
 #' 
 #' # For visual examination reconstruct original vector from compressed representation
 #' rec <- reconstruct(maxPCA, compr)
-max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, ...) {
+max_stable_prcomp <- function(data, p, s = 3, regularization_l1 = F, lambda = 0.1, n_initial_guesses = 150, ...) {
 
   data <- as.matrix(data)
   d <- dim(data)[2]
 
-  # setting up target function with data to be callable
-  target_fn <- function(x) target_fn_data(x, d, p, s, data)
+  # setting up target function with data to be callable 
+  if(regularization_l1) {
+    target_fn <- function(x) target_fn_data(x, d, p, s, data)  + lambda * sum(create_H(x, d, p))
+  } else {
+    target_fn <- function(x) target_fn_data(x, d, p, s, data)
+  }
 
   # setting up lower bound to absolutely prohibit negative values
   lower <- rep(0, 2 * d * p)
