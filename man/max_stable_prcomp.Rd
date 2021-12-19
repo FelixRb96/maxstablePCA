@@ -4,7 +4,15 @@
 \alias{max_stable_prcomp}
 \title{Calculate max-stable PCA with dimension p for given dataset}
 \usage{
-max_stable_prcomp(data, p, s = 3, n_initial_guesses = 150, ...)
+max_stable_prcomp(
+  data,
+  p,
+  s = 3,
+  regularization_l1 = F,
+  lambda = 0.1,
+  n_initial_guesses = 150,
+  ...
+)
 }
 \arguments{
 \item{data, }{array or data.frame of n observations of d variables
@@ -17,6 +25,10 @@ combinations in the compressed representation.}
 
 \item{s}{(default = 3), numeric greater than 0. Hyperparameter for the
 stable tail dependence estimator used in tn the calculation.}
+
+\item{regularization_l1, }{boolean if true, the target function has an additional term involving the l1 norm of the reconstruction matrix.}
+
+\item{lambda, }{numeric greater or equal to zero. Hyperparameter for the l1 regularization. Has no effect if regularization_l1 is set to false.}
 
 \item{n_initial_guesses}{number of guesses to choose a valid initial value 
 for optimization from. This procedure uses a pseudo random number generator so 

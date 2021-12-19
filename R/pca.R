@@ -14,6 +14,8 @@
 #' @param p, integer between 1 and ncol(data). Determines
 #' the dimension of the encoded state, i.e. the number of max-linear
 #' combinations in the compressed representation.
+#' @param regularization_l1, boolean if true, the target function has an additional term involving the l1 norm of the reconstruction matrix.
+#' @param lambda, numeric greater or equal to zero. Hyperparameter for the l1 regularization. Has no effect if regularization_l1 is set to false. 
 #' @param n_initial_guesses number of guesses to choose a valid initial value 
 #' for optimization from. This procedure uses a pseudo random number generator so 
 #' setting a seed is necessary for reproducibility. 
