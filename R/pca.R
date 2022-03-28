@@ -14,8 +14,6 @@
 #' @param p, integer between 1 and ncol(data). Determines
 #' the dimension of the encoded state, i.e. the number of max-linear
 #' combinations in the compressed representation.
-#' @param regularization_l1, boolean if true, the target function has an additional term involving the l1 norm of the reconstruction matrix.
-#' @param lambda, numeric greater or equal to zero. Hyperparameter for the l1 regularization. Has no effect if regularization_l1 is set to false. 
 #' @param n_initial_guesses number of guesses to choose a valid initial value 
 #' for optimization from. This procedure uses a pseudo random number generator so 
 #' setting a seed is necessary for reproducibility. 
@@ -47,20 +45,17 @@
 #' 
 #' # For visual examination reconstruct original vector from compressed representation
 #' rec <- reconstruct(maxPCA, compr)
-max_stable_prcomp <- function(data, p, s = 3, regularization_l1 = F, lambda = 0.1, n_initial_guesses = 150, ...) {
+max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, ...) {
 
   data <- as.matrix(data)
   d <- dim(data)[2]
 
-  # setting up target function with data to be callable 
-  if(regularization_l1) {
-    target_fn <- function(x) target_fn_data(x, d, p, s, data)  + lambda * sum(create_H(x, d, p))
-  } else {
-    target_fn <- function(x) target_fn_data(x, d, p, s, data)
-  }
+  target_fn <- function(x) target_fn_data(x, d, p, s, data)
 
   # setting up lower bound to absolutely prohibit negative values
   lower <- rep(0, 2 * d * p)
+  upper <- rep(1, 2 * d * p)
+
 
   # setting up sharper inequality constraints than just lower bound
   constr_hin <- function(x) constraint_ineq(x, d, p)
@@ -71,7 +66,7 @@ max_stable_prcomp <- function(data, p, s = 3, regularization_l1 = F, lambda = 0.
   # take care of the case p = 1 later where distances are not relevant
   if(p > 1) {
 
-    # mae sure the distance matrix does not get too large
+    # make sure the distance matrix does not get too large
     data_dist <- data
     if(nrow(data) > 5000) {
       print("prining data for creation of starting value")
@@ -112,7 +107,7 @@ max_stable_prcomp <- function(data, p, s = 3, regularization_l1 = F, lambda = 0.
     searching_x0 <- T
 
     while(searching_x0) {
-      x0_cands <- matrix(stats::runif(n_initial_guesses * 2 * d * p, 0.1, 1.15), n_initial_guesses, 2 * d * p)
+      x0_cands <- matrix(stats::runif(n_initial_guesses * 2 * d * p, 0.1, 1), n_initial_guesses, 2 * d * p)
       x0_cands[, 1:(d*p)] <- matrix(base_columns, n_initial_guesses, d * p, byrow = T)
 
       x0_valid <- x0_cands[apply(x0_cands, 1, function(x) all(constr_hin(x) >= 0)), ]
@@ -127,16 +122,21 @@ max_stable_prcomp <- function(data, p, s = 3, regularization_l1 = F, lambda = 0.
       }
     }
   } else {
-    x0 <- c(base::colMeans(data), rep(1, d))
+    x0 <- c(base::colMeans(data) / sum(base::colMeans(data)), rep(0.999, d))
   }
 
   # call the optimizer to calculate a solution candidate
-  optimizer_result <- nloptr::slsqp(x0, target_fn, hin = constr_hin, lower = lower, ...)
+  # opts <- list("algorithm"="NLOPT_LN_COBYLA")
+  # optimizer_result <- nloptr::nloptr(x0, target_fn, eval_g_ineq = function(x) -constr_hin(x), lb = lower, opts = opts, ...)
+  optimizer_result <- nloptr::slsqp(x0, target_fn, hin = constr_hin, lower = lower, upper = upper, ...)
 
   # set up the necessary matrices and objects for the return value
-  decoder_matrix <- matrix(optimizer_result$par[1:(d*p)], d, p)
+  # decoder_matrix <- matrix(optimizer_result$solution[1:(d*p)], d, p)
+  # encoder_matrix <- matrix(optimizer_result$solution[(d*p + 1):(2 * d * p)], p, d)
   encoder_matrix <- matrix(optimizer_result$par[(d*p + 1):(2 * d * p)], p, d)
-  reconstr_matrix <- maxmatmul(decoder_matrix, encoder_matrix)
+  decoder_matrix <- matrix(optimizer_result$par[1:(d*p)], d, p)
+
+  reconstr_matrix <- maxmatmulC(decoder_matrix, encoder_matrix)
 
   result <- list(
                  p = p,
@@ -145,6 +145,7 @@ max_stable_prcomp <- function(data, p, s = 3, regularization_l1 = F, lambda = 0.
                  encoder_matrix = encoder_matrix,
                  reconstr_matrix = reconstr_matrix,
                  loss_fctn_value = optimizer_result$value - d,
+                 # loss_fctn_value = optimizer_result$objective - d,
                  optim_conv_status = optimizer_result$convergence,
                  s = s
   )
@@ -192,7 +193,7 @@ max_stable_prcomp <- function(data, p, s = 3, regularization_l1 = F, lambda = 0.
 #' rec <- reconstruct(maxPCA, compr)
 compress <- function(fit, data) {
   # TODO: take care of vectors!
-  return(t(maxmatmul(fit$encoder_matrix, t(data))))
+  return(t(maxmatmulC(fit$encoder_matrix, t(data))))
 }
 
 #' Reconstruct the data from the compressed representation
@@ -234,7 +235,7 @@ compress <- function(fit, data) {
 #' rec <- reconstruct(maxPCA, compr)
 reconstruct <- function(fit, compressed_data) {
   # TODO: take care of vectors!
-  return(t(maxmatmul(fit$decoder_matrix, t(compressed_data))))
+  return(t(maxmatmulC(fit$decoder_matrix, t(compressed_data))))
 }
 
 #' Print summary of a max_stable_prcomp object.
@@ -263,7 +264,7 @@ summary.max_stable_prcomp <- function(object, ...) {
 create_H <- function(x, d, p) {
   A <- matrix(x[1:(d * p)], d, p)
   V <- matrix(x[(d * p + 1):length(x)], p, d)
-  H <- maxmatmul(A, V)
+  H <- maxmatmulC(A, V)
   return(H)
 }
 
@@ -275,7 +276,7 @@ target_fn_data <- function(x, d, p, s, data)  {
   H <- create_H(x, d, p)
   id <- diag(length(H[1,]))
 
-  std <- function(z) stable_tail_dependence(z, s, data)
+  std <- function(z) stable_tail_dependenceC(z, s, data)
   row_fctn <- function(i) return(2 * std(pmax(H[i,], id[i,])) - std(H[i,]))
 
   # calculate result

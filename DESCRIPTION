@@ -1,10 +1,10 @@
+Title: maxstablePCA
 Package: maxstablePCA
 Type: Package
-Title: maxstablePCA (http://github.com/author/package)
 Description: Dimension reduction for multivariate data of extreme events with a PCA like procedure. Tools for necessary transformations of the data are provided. The user is advised to read [...]. 
 Version: 0.1.0
-Author: Felix Reinbott <felix.reinbott@ocgu.de>
-Maintainer: Felix Reinbott<felix.reinbott@ovgu.de>
+Author: Felix Reinbott <felix.reinbott@ovgu.de>
+Maintainer: Felix Reinbott <felix.reinbott@ovgu.de>
 Authors@R: c(person("Felix", "Reinbott",
     email = "felix.reinbott@ovgu.de", role = c("aut", "cre")))
 Depends:
