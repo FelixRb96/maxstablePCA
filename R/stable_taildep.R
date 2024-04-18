@@ -1,7 +1,4 @@
-# TTT
-#
-#
-
+# 
 
 #' Calculate the estimated stable tail dependence at point x for given dataset.
 #'

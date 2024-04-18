@@ -19,6 +19,7 @@
 #' setting a seed is necessary for reproducibility. 
 #' @param s (default = 3), numeric greater than 0. Hyperparameter for the
 #' stable tail dependence estimator used in tn the calculation.
+#' @param norm (delfault "l1") which norm to use for the spectral measure estimator, currently only l1 and sup norm "linfty" are available. 
 #' @param ... additional parameters passed to \code{link{nloptr::slsqp()}}
 #' @return object of class max_stable_prcomp with slots
 #' p, inserted value of dimension,
@@ -45,16 +46,28 @@
 #' 
 #' # For visual examination reconstruct original vector from compressed representation
 #' rec <- reconstruct(maxPCA, compr)
-max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, ...) {
+max_stable_prcomp <- function(data, p, s = 3, lambda = 0, norm = "l1", n_initial_guesses = 150, ...) {
 
-  data <- as.matrix(data)
+  dat <- as.matrix(data)
+  if(norm == "l1") {
+    dat_extr <- data[which(rowSums(dat) > s), ]
+    dat_normed_extr <- t(apply(dat_extr, 1, function(z) z / sum(abs(z))))
+  }
+  if(norm == "linfty") {
+    dat_extr <- data[which(apply(dat, 1, max) > s), ]
+    dat_normed_extr <- t(apply(dat_extr, 1, function(z) z / max(z)))
+  }
+
+
+
+  n <- dim(data)[1]
   d <- dim(data)[2]
-
-  target_fn <- function(x) target_fn_data(x, d, p, s, data)
+  
+  target_fn <- function(x) target_fn_data(x, d, p, s, n, lambda, dat_normed_extr)
 
   # setting up lower bound to absolutely prohibit negative values
   lower <- rep(0, 2 * d * p)
-  upper <- rep(1, 2 * d * p)
+  upper <- c(rep(as.numeric(d - p + 1),d * p), rep(1.0, d * p))
 
 
   # setting up sharper inequality constraints than just lower bound
@@ -67,19 +80,16 @@ max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, ...) {
   if(p > 1) {
 
     # make sure the distance matrix does not get too large
-    data_dist <- data
-    if(nrow(data) > 5000) {
-      print("prining data for creation of starting value")
-      data_dist <- data[sample(1:nrow(data), 5000), ]
+    if(nrow(dat_extr) > 5000) {
+      warning("s seems to be small or the data set is large, optimization might fail...")
     }
 
 
     # norm data and calculate distances between points from data on 1-norm sphere
-    data_normed <- t(apply(data_dist, 1, function(x) x / sum(abs(x))))
-    distmat <- matrix(0, nrow(data_normed), nrow(data_normed))
-    for(i in 1:nrow(data_normed)) {
+    distmat <- matrix(0, nrow(dat_normed_extr), nrow(dat_normed_extr))
+    for(i in 1:nrow(dat_normed_extr)) {
       for(j in 1:i) {
-        distmat[i,j] <- sum(abs(data_normed[i,] - data_normed[j,]))
+        distmat[i,j] <- sum(abs(dat_normed_extr[i,] - dat_normed_extr[j,]))
       }
     }
 
@@ -122,13 +132,20 @@ max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, ...) {
       }
     }
   } else {
-    x0 <- c(base::colMeans(data) / sum(base::colMeans(data)), rep(0.999, d))
+    x0 <- c(base::colMeans(dat_extr) / sum(base::colMeans(dat_extr)), rep(0.999, d))
   }
 
   # call the optimizer to calculate a solution candidate
   # opts <- list("algorithm"="NLOPT_LN_COBYLA")
   # optimizer_result <- nloptr::nloptr(x0, target_fn, eval_g_ineq = function(x) -constr_hin(x), lb = lower, opts = opts, ...)
-  optimizer_result <- nloptr::slsqp(x0, target_fn, hin = constr_hin, lower = lower, upper = upper, ...)
+  optimizer_result <- nloptr::slsqp(
+                                    x0, 
+                                    target_fn, 
+                                    hin = constr_hin, 
+                                    lower = lower, 
+                                    upper = upper, 
+                                    ...
+  )
 
   # set up the necessary matrices and objects for the return value
   # decoder_matrix <- matrix(optimizer_result$solution[1:(d*p)], d, p)
@@ -136,7 +153,7 @@ max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, ...) {
   encoder_matrix <- matrix(optimizer_result$par[(d*p + 1):(2 * d * p)], p, d)
   decoder_matrix <- matrix(optimizer_result$par[1:(d*p)], d, p)
 
-  reconstr_matrix <- maxmatmulC(decoder_matrix, encoder_matrix)
+  reconstr_matrix <- maxmatmul(decoder_matrix, encoder_matrix)
 
   result <- list(
                  p = p,
@@ -144,15 +161,19 @@ max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, ...) {
                  decoder_matrix = decoder_matrix,
                  encoder_matrix = encoder_matrix,
                  reconstr_matrix = reconstr_matrix,
-                 loss_fctn_value = optimizer_result$value - d,
-                 # loss_fctn_value = optimizer_result$objective - d,
+                 loss_fctn_value = optimizer_result$value,
                  optim_conv_status = optimizer_result$convergence,
-                 s = s
+                 s = s, 
+                 starting_vals = list(
+                                      encoder_matrix_x0 = matrix(x0[1:(d * p)], d, p), 
+                                      decoder_matrix_xo = matrix(x0[(d * p + 1):(2 * d * p)], d, p)
+                 )
   )
 
   class(result) <- "max_stable_prcomp"
   return(result)
 }
+
 
 # --- helper functions to obtain latent space representations and transofrm data ---
 
@@ -193,49 +214,7 @@ max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, ...) {
 #' rec <- reconstruct(maxPCA, compr)
 compress <- function(fit, data) {
   # TODO: take care of vectors!
-  return(t(maxmatmulC(fit$encoder_matrix, t(data))))
-}
-
-#' Reconstruct the data from the compressed representation
-#'
-#' Calculate the reconstruction given by the compressed state
-#' compressed_data and the fit object from the max-stable PCA.
-#' Can be used for visual assessment of the fit if p should be chosen
-#' differently.
-#'
-#' @param fit, max_stable_prcomp object. Data should be
-#' assumed to follow the same distribution as the data used in
-#' max_stable_prcomp.
-#' @param compressed_data a compressed representation of 
-#' data obtained by calling \code{compress(fit, data)} 
-#' intended to be calculated with the same fit.
-#' @return array of dimension nrow(compressed_data), d
-#' An optimal reconstruction with max-linear combinations 
-#' from p max-linearly independent columns.
-#' @seealso [maxstablePCA::compress(), 
-#' maxstablePCA::max_stable_prcomp(),
-#' maxstablePCA::maxmatmul()]
-#' @export
-#' @examples
-#' # generate some data with the desired margins
-#' dat <- matrix(evd::rfrechet(300), 100, 3)
-#' maxPCA <- max_stable_prcomp(dat, 2)
-#' 
-#' #  look at summary to obtain further information about 
-#' # loadings the space spanned and loss function
-#' summary(maxPCA)
-#' 
-#' # transfrom data to compressed representation
-#' # for a representation that is p-dimensional,
-#' # preserves the max-stable structure and is numeric solution to 
-#' # optimal reconstruction.
-#' compr <- compress(maxPCA, dat)
-#' 
-#' # For visual examination reconstruct original vector from compressed representation
-#' rec <- reconstruct(maxPCA, compr)
-reconstruct <- function(fit, compressed_data) {
-  # TODO: take care of vectors!
-  return(t(maxmatmulC(fit$decoder_matrix, t(compressed_data))))
+  return(t(maxmatmul(fit$encoder_matrix, t(data))))
 }
 
 #' Print summary of a max_stable_prcomp object.
@@ -256,24 +235,18 @@ summary.max_stable_prcomp <- function(object, ...) {
 
 }
 
+#' Loss for a given reconstruction matrix
+#' 
+#' TODO 
+#' 
+#' @param H, a (d x d) matrix where d is the number of columns of data
+#' @param data, a matrix like object of shape (n x d), where d is the same as for H. Should be transformed (TODO). 
+#' @param s, non-negative numeric, tunig parameter for the stable tail dependence function. For further information see TODO. 
+#' @export
+#' @examples 
+#' TODO
+reconstr_loss <- function(H, data, s) {
 
-
-# --- internal functions to solve minimization problem ---
-
-# Creates the reconstruction matrix H from optimizer result
-create_H <- function(x, d, p) {
-  A <- matrix(x[1:(d * p)], d, p)
-  V <- matrix(x[(d * p + 1):length(x)], p, d)
-  H <- maxmatmulC(A, V)
-  return(H)
-}
-
-# Helper function to calculate the distance of the reconstruction 
-#  from the data.
-target_fn_data <- function(x, d, p, s, data)  {
-
-  # set up matrices and functions needed from input
-  H <- create_H(x, d, p)
   id <- diag(length(H[1,]))
 
   std <- function(z) stable_tail_dependenceC(z, s, data)
@@ -282,6 +255,29 @@ target_fn_data <- function(x, d, p, s, data)  {
   # calculate result
   result <- sum(sapply(1:length(H[1,]), row_fctn))
   return(result)
+
+}
+
+
+
+# --- internal functions to solve minimization problem ---
+
+# Creates the reconstruction matrix H from optimizer result
+create_H <- function(x, d, p) {
+  A <- matrix(x[1:(d * p)], d, p)
+  V <- matrix(x[(d * p + 1):length(x)], p, d)
+  H <- maxmatmul(A, V)
+  return(H)
+}
+
+target_fn_data <- function(x, d, p, s, n, lambda, data_normed_extr) {
+  # create H from optimizer vector
+  H <- create_H(x, d, p)
+
+  # calculate rownorms and change to relevant subset
+  rec_standardized <- t(maxmatmul(H, t(data_normed_extr)))
+  penalty <- lambda * (sum(abs(x)))
+  return(sum(abs(data_normed_extr - rec_standardized)) * s / n + lambda * penalty)
 }
 
 # constraint helper function to ensure non-neagtivity of vector x.

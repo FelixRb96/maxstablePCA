@@ -2,7 +2,7 @@
 % Please edit documentation in R/maxlinalg.R
 \name{maxmatmul}
 \alias{maxmatmul}
-\title{Mulitply two matrices with the max operation}
+\title{Multiply two matrices with a C function.}
 \usage{
 maxmatmul(A, B)
 }

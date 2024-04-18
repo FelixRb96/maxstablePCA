@@ -37,17 +37,7 @@ on the marginals should be carefully checked.
 \examples{
 # create a sample 
 dat <- rnorm(1000)
-transoformed_dat <- transform_unitfrechet(dat)
-retransformed_dat <- transform_orig_margins(transoformed_dat, dat)
-
-# create a boxplot of retransformation to visually examine distribution
-boxplot(retransformed_dat)
-plot(stats::ecdf(retransformed_dat))
-
-# Transform columns of a data matrix
-dat2 <- matrix(rnorm(3000), 1000, 3)
-transformed_dat2 <- transform_unitfrechet(dat2)
-retransformed_dat2 <- transform_orig_margins(transformed_dat2, dat2)
+transformed_dat <- transform_unitpareto(dat)
 }
 \seealso{
 [maxstablePCA::max_stable_prcomp(), mev__fit.gev()] for information about why to transform data.
