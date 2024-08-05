@@ -4,15 +4,7 @@
 \alias{max_stable_prcomp}
 \title{Calculate max-stable PCA with dimension p for given dataset}
 \usage{
-max_stable_prcomp(
-  data,
-  p,
-  s = 3,
-  lambda = 0,
-  norm = "l1",
-  n_initial_guesses = 150,
-  ...
-)
+max_stable_prcomp(data, p, s = 3, n_initial_guesses = 150, norm = "l1", ...)
 }
 \arguments{
 \item{data, }{array or data.frame of n observations of d variables
@@ -26,11 +18,11 @@ combinations in the compressed representation.}
 \item{s}{(default = 3), numeric greater than 0. Hyperparameter for the
 stable tail dependence estimator used in tn the calculation.}
 
-\item{norm}{(delfault "l1") which norm to use for the spectral measure estimator, currently only l1 and sup norm "linfty" are available.}
-
 \item{n_initial_guesses}{number of guesses to choose a valid initial value 
 for optimization from. This procedure uses a pseudo random number generator so 
 setting a seed is necessary for reproducibility.}
+
+\item{norm}{(delfault "l1") which norm to use for the spectral measure estimator, currently only l1 and sup norm "linfty" are available.}
 
 \item{...}{additional parameters passed to \code{link{nloptr::slsqp()}}}
 }

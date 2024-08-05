@@ -2,29 +2,29 @@
 % Please edit documentation in R/pca.R
 \name{reconstruct}
 \alias{reconstruct}
-\title{Reconstruct the data from the compressed representation}
+\title{Obtain reconstructed data for PCA}
 \usage{
-reconstruct(fit, compressed_data)
+reconstruct(fit, data)
 }
 \arguments{
 \item{fit, }{max_stable_prcomp object. Data should be
 assumed to follow the same distribution as the data used in
 max_stable_prcomp.}
 
-\item{compressed_data}{a compressed representation of 
-data obtained by calling \code{compress(fit, data)} 
-intended to be calculated with the same fit.}
+\item{data, }{array with same number of columns as the
+data of the fit object.}
 }
 \value{
-array of dimension nrow(compressed_data), d
-An optimal reconstruction with max-linear combinations 
-from p max-linearly independent columns.
+An array of shape nrow(data), p giving the
+encoded representation of the data in p components which are
+also unit Frechet distributed which is to be takin into consideration for
+further analysis.
 }
 \description{
-Calculate the reconstruction given by the compressed state
-compressed_data and the fit object from the max-stable PCA.
-Can be used for visual assessment of the fit if p should be chosen
-differently.
+Turn the data to the reconstruction 
+given by the fit of the max_stable_prcomp function.
+This is done by taking the max-matrix product of the data
+and the reconstruction matrix from the fit.
 }
 \examples{
 # generate some data with the desired margins
@@ -45,7 +45,5 @@ compr <- compress(maxPCA, dat)
 rec <- reconstruct(maxPCA, compr)
 }
 \seealso{
-[maxstablePCA::compress(), 
-maxstablePCA::max_stable_prcomp(),
-maxstablePCA::maxmatmul()]
+[maxstablePCA::max_stable_prcomp(), maxstablePCA::maxmatmul()]
 }

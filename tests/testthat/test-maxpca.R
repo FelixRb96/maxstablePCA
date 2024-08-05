@@ -15,15 +15,16 @@ maxstabPCA3 <- max_stable_prcomp(sample, 3)
 
 maxstabPCA <- maxstabPCA2
 
-zz <- matrix(rfrechet(200), 100, 2)
-compr <- compress(maxstabPCA, zz)
-reconstr <- reconstruct(maxstabPCA, compr)
+zz <- matrix(rfrechet(300), 100, 3)
+xx <- t(maxmatmul(A, t(zz))) 
+compr <- compress(maxstabPCA, xx)
+reconstr <- reconstruct(maxstabPCA, xx)
 
-zv <- rfrechet(2)
-sampzv <- t(maxmatmul(A, zv))
+zv <- matrix(rfrechet(4), 2, 2)
+sampzv <- t(maxmatmul(A, zv)) 
 print(sampzv)
 compv <- compress(maxstabPCA, sampzv)
-recv <- reconstruct(maxstabPCA, compv)
+recv <- reconstruct(maxstabPCA, sampzv)
 
 
 
@@ -34,9 +35,8 @@ test_that("Testing max-PCA and setup functions", {
   expect_equal(dim(compr)[2], 2)
 
   expect_equal(dim(recv)[2], 3)
-  expect_equal(dim(recv)[1], 1)
+  expect_equal(dim(recv)[1], 2)
   expect_equal(dim(compv)[2], 2)
-
 
 })
 
