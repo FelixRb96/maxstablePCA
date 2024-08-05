@@ -16,7 +16,7 @@
 #' The entries are given by the maximum of componentwise multiplication
 #' of rows from A and columns from B. 
 #' @export
-#' @useDynLib maxstablePCA maxmatmulRC
+#' @useDynLib maxstablePCA, .registration = TRUE, maxmatmulRC
 #' @examples
 #' # Set up example matrices
 #' A <- matrix(c(1,2,3,4,5,6), 2, 3)
