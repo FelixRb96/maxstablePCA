@@ -49,6 +49,8 @@
 max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, norm = "l1", ...) {
 
   dat <- as.matrix(data)
+  
+  if(any(dat < 0)) base::stop("ERROR: please make sure the data is transformed to pareto margins, some values the data were negative.")
 
   # filter out the extreme data and prepare the normed data of extremes
   if(norm == "l1") {

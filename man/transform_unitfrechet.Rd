@@ -2,34 +2,21 @@
 % Please edit documentation in R/transform_unitfrechet.R
 \name{transform_unitfrechet}
 \alias{transform_unitfrechet}
-\title{Transform the columns of a dataset to unit Frechet margins}
+\title{Transform the columns of a dataset to (approximately) unit Frechet margins}
 \usage{
-transform_unitfrechet(data, empirical = TRUE, ...)
+transform_unitfrechet(data)
 }
 \arguments{
 \item{data, }{array or vector with the data which columns are to be transformed}
-
-\item{empirical, }{logical to indicate the transformation method. If true the data
-is transformed using the empical distribution function. If \code{FALSE}, the 
-data is transformed using a MLE fit of a generalized extreme value distribution to the data.
-Using the empirical distribution function does not require the data to have approximately
-max-stable distribution, thus is set to default.}
-
-\item{..., }{additional arguments for \code{mev::fit.gev()}}
 }
 \value{
-array or vector of same shape and type as data with the transformed data with unit 
+array or vector of same shape and type as data with the transformed data with unit
 Frechet margins-
 }
 \description{
 Transforms columns of dataset to unit Frechet margins, to ensure
 the theoretical requirements are satisfied for the application of
-\code{\link{max_stable_prcomp}}.
-}
-\details{
-Additional care is needed when using the non empirical method, since for large 
-datasets the optimizer may not converge for some columns and the assumption of a GEV
-on the marginals should be carefully checked.
+\code{\link{max_stable_prcomp}} using the empirical distribution function.
 }
 \examples{
 # sample some data
@@ -41,6 +28,5 @@ boxplot(transformed_dat)
 plot(stats::ecdf(transformed_dat))
 }
 \seealso{
-[maxstablePCA::max_stable_prcomp(), maxstablePCA::transform_orig_margins(), mev::fit.gev())] for information about why to transform data
-and the MLE method used internally.
+[maxstablePCA::max_stable_prcomp(), maxstablePCA::transform_orig_margins(), mev::fit.gev())] for information about why to transform data.
 }
