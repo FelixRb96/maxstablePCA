@@ -27,9 +27,7 @@ dat <- rnorm(1000)
 transformed_dat <- transform_unitpareto(dat)
 }
 \seealso{
-\code{\link[=max_stable_prcomp(), mev__fit.gev]{max_stable_prcomp(), mev__fit.gev()}} for information about why to transform data.
+\code{\link[=max_stable_prcomp]{max_stable_prcomp()}}, \code{\link[=transform_unitfrechet]{transform_unitfrechet()}}, [mev::fit.gev())] for information about why to transform data
 
-[maxstablePCA::max_stable_prcomp(), maxstablePCA::transform_unitfrechet(), mev::fit.gev())] for information about why to transform data
-
-[maxstablePCA::max_stable_prcomp(), maxstablePCA::transform_unitfrechet(), mev::fit.gev())]: R:maxstablePCA::max_stable_prcomp(),\%20maxstablePCA::transform_unitfrechet(),\%20mev::fit.gev())
+[mev::fit.gev())]: R:mev::fit.gev())
 }

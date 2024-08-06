@@ -104,10 +104,9 @@ transform_unitpareto <- function(data) {
 #'
 #' @param transformed_data, arraylike data of dimension n, d
 #' @param orig_data, arraylike data of dimension n , d
-#' @seealso [maxstablePCA::max_stable_prcomp(), mev__fit.gev()] for information about why to transform data.
 #' @return array of dimension n,d with transformed columns of transformed_data that follow approximately the same
 #' marginal distribution of orig_data.
-#' @seealso [maxstablePCA::max_stable_prcomp(), maxstablePCA::transform_unitfrechet(), mev::fit.gev())] for information about why to transform data
+#' @seealso [max_stable_prcomp()], [transform_unitfrechet()], [mev::fit.gev())] for information about why to transform data
 #' @export
 #' @examples
 #' # create a sample
