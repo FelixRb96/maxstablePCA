@@ -45,5 +45,5 @@ compr <- compress(maxPCA, dat)
 rec <- reconstruct(maxPCA, compr)
 }
 \seealso{
-\code{\link[=max_stable_prcomp(), maxmatmul]{max_stable_prcomp(), maxmatmul()}}
+\code{\link[=max_stable_prcomp]{max_stable_prcomp()}}, \code{\link[=maxmatmul]{maxmatmul()}}
 }

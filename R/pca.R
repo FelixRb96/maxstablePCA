@@ -146,7 +146,7 @@ max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, norm = "l
 #' @param fit, max_stable_prcomp object. Data should be
 #' assumed to follow the same distribution as the data used in
 #' max_stable_prcomp.
-#' @seealso [max_stable_prcomp(), maxmatmul()]
+#' @seealso [max_stable_prcomp()], [maxmatmul()]
 #' @return An array of shape nrow(data), p giving the
 #' encoded representation of the data in p components which are
 #' also unit Frechet distributed which is to be takin into consideration for
@@ -186,7 +186,7 @@ compress <- function(fit, data) {
 #' @param fit, max_stable_prcomp object. Data should be
 #' assumed to follow the same distribution as the data used in
 #' max_stable_prcomp.
-#' @seealso [max_stable_prcomp(), maxmatmul()]
+#' @seealso [max_stable_prcomp()], [maxmatmul()]
 #' @return An array of shape nrow(data), p giving the
 #' encoded representation of the data in p components which are
 #' also unit Frechet distributed which is to be takin into consideration for
