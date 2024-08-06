@@ -2,7 +2,7 @@
 % Please edit documentation in R/maxlinalg.R
 \name{maxmatmul}
 \alias{maxmatmul}
-\title{Multiply two matrices with a C function.}
+\title{Multiply two matrices with a matrix product that uses maxima instead of addition}
 \usage{
 maxmatmul(A, B)
 }
@@ -12,17 +12,19 @@ maxmatmul(A, B)
 \item{B}{a non-negative array of dim k, l}
 }
 \value{
-A non netgative array of dim n, l. 
+A non netgative array of dim n, l.
 The entries are given by the maximum of componentwise multiplication
 of rows from A and columns from B.
 }
 \description{
-Max-stable distributions are preserved by taking 
-maxima and scaling with non-neagtive numbers.
-Thus when applying PCA for extremes it is 
-natural to use max-matrix multiplication given
-by calculating the entries with 
-\eqn{A \cdot B = \bigvee_{j=1}^k A_{cdot j} B_{j \cdot}}.
+By calculating the entries with
+\deqn{(A \diamond B)_{ij} = \max_{j=1,..., l} A_{il} B_{lj}}
+for appropriate dimensions. Note that this operation is particularly
+useful when working with multivariate exreme value distributions,
+because, if the margins are standardized to standard Fréchet margins,
+then the max-matrix product of a matrix A and a multivariate extreme value
+distribution Z with standard Fréchet margins has the same margins up
+to scaling.
 }
 \examples{
 # Set up example matrices

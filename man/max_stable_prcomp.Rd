@@ -18,8 +18,8 @@ combinations in the compressed representation.}
 \item{s}{(default = 3), numeric greater than 0. Hyperparameter for the
 stable tail dependence estimator used in tn the calculation.}
 
-\item{n_initial_guesses}{number of guesses to choose a valid initial value 
-for optimization from. This procedure uses a pseudo random number generator so 
+\item{n_initial_guesses}{number of guesses to choose a valid initial value
+for optimization from. This procedure uses a pseudo random number generator so
 setting a seed is necessary for reproducibility.}
 
 \item{norm}{(delfault "l1") which norm to use for the spectral measure estimator, currently only l1 and sup norm "linfty" are available.}
@@ -31,17 +31,17 @@ object of class max_stable_prcomp with slots
 p, inserted value of dimension,
 decoder_matrix, an array of shape (d,p), where the columns represent the basis of the max-linear space for the reconstruction.
 encoder_matrix, an array of shape (p,d), where the rows represent the loadings as max-linear combinations for the compressed representation.
-reconstr_matrix, an array of shape (d,d), where the matrix is the mapping of the data to the optimal max-linear combinations of columns of decoder_matrix.
+reconstr_matrix, an array of shape (d,d), where the matrix is the mapping of the data to the reconstruction used for the distance minimization.
 loss_fctn_value, float representing the final loss function value of the fit.
 optim_conv_status, integer indicating the convergence of the optimizer if greater than 0.
 }
 \description{
-Find a p dimensional max-linear subspace that describes the data 
-best by trying to find optimal max-linear combinations.
-}
-\details{
-For details on the statistical procedure it is advised to 
-read the articles TODO.
+Find an optimal encoding of data of extremes using max-linear combinations
+by a distance minimization approach. Can be used to check if the data
+follows approximately a generalized max-linear model.
+For details on the statistical procedure it is advised to
+consult the articles "F. Reinbott, A. Janßen, Principal component analysis for max-stable distributions (to appear)"
+and "M.Schlather F. Reinbott, A semi-group approach to Principal Component Analysis (2021)".
 }
 \examples{
 # generate some data with the desired margins

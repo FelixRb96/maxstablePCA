@@ -4,7 +4,7 @@
 
 #' Transform the columns of a dataset to (approximately) unit Frechet margins
 #'
-#' Transforms columns of dataset to unit Frechet margins, to ensure
+#' @description Transforms columns of dataset to unit Frechet margins, to ensure
 #' the theoretical requirements are satisfied for the application of
 #' \code{\link{max_stable_prcomp}} using the empirical distribution function. 
 #'
@@ -50,7 +50,7 @@ transform_unitfrechet <- function(data) {
 
 #' Transform the columns of a dataset to unit Pareto
 #'
-#' Transforms columns of dataset to unit Pareto margins, to ensure
+#' @description Transforms columns of dataset to unit Pareto margins, to ensure
 #' the theoretical requirements are satisfied for the application of
 #' \code{\link{max_stable_prcomp}} using the empirical distribution function. 
 #'

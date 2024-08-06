@@ -2,12 +2,14 @@
 
 #' Calculate max-stable PCA with dimension p for given dataset
 #'
-#' Find a p dimensional max-linear subspace that describes the data 
-#' best by trying to find optimal max-linear combinations. 
-#' 
-#' For details on the statistical procedure it is advised to 
-#' read the articles TODO. 
+#' @description Find an optimal encoding of data of extremes using max-linear combinations
+#' by a distance minimization approach. Can be used to check if the data
+#' follows approximately a generalized max-linear model.
+#' For details on the statistical procedure it is advised to
+#'consult the articles "F. Reinbott, A. Janßen, Principal component analysis for max-stable distributions (to appear)"
+#' and "M.Schlather F. Reinbott, A semi-group approach to Principal Component Analysis (2021)". 
 #'
+#' @name max_stable_prcomp
 #' @param data, array or data.frame of n observations of d variables
 #' with unit Frechet margins. The max-stable PCA is fitted to
 #' reconstruct this dataset with a rank p approximation.
@@ -25,7 +27,7 @@
 #' p, inserted value of dimension,
 #' decoder_matrix, an array of shape (d,p), where the columns represent the basis of the max-linear space for the reconstruction.
 #' encoder_matrix, an array of shape (p,d), where the rows represent the loadings as max-linear combinations for the compressed representation.
-#' reconstr_matrix, an array of shape (d,d), where the matrix is the mapping of the data to the optimal max-linear combinations of columns of decoder_matrix.
+#' reconstr_matrix, an array of shape (d,d), where the matrix is the mapping of the data to the reconstruction used for the distance minimization.
 #' loss_fctn_value, float representing the final loss function value of the fit.
 #' optim_conv_status, integer indicating the convergence of the optimizer if greater than 0.
 #' @export
@@ -133,17 +135,18 @@ max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, norm = "l
 
 #' Transform data to compact representation given by max-stable PCA
 #'
-#' Turn the given data into a compressed latent representation
+#' @description Turn the given data into a compressed latent representation
 #' given by the fit of the max_stable_prcomp function.
 #' This is done by taking the max-matrix product of the data
 #' and the encoder matrix from the fit.
 #'
+#' @name compress
 #' @param data, array with same number of columns as the
 #' data of the fit object.
 #' @param fit, max_stable_prcomp object. Data should be
 #' assumed to follow the same distribution as the data used in
 #' max_stable_prcomp.
-#' @seealso [maxstablePCA::max_stable_prcomp(), maxstablePCA::maxmatmul()]
+#' @seealso [max_stable_prcomp(), maxmatmul()]
 #' @return An array of shape nrow(data), p giving the
 #' encoded representation of the data in p components which are
 #' also unit Frechet distributed which is to be takin into consideration for
@@ -172,17 +175,18 @@ compress <- function(fit, data) {
 
 #' Obtain reconstructed data for PCA
 #'
-#' Turn the data to the reconstruction 
+#' @description Map the data to the reconstruction 
 #' given by the fit of the max_stable_prcomp function.
 #' This is done by taking the max-matrix product of the data
 #' and the reconstruction matrix from the fit.
 #'
+#' @name reconstruct
 #' @param data, array with same number of columns as the
 #' data of the fit object.
 #' @param fit, max_stable_prcomp object. Data should be
 #' assumed to follow the same distribution as the data used in
 #' max_stable_prcomp.
-#' @seealso [maxstablePCA::max_stable_prcomp(), maxstablePCA::maxmatmul()]
+#' @seealso [max_stable_prcomp(), maxmatmul()]
 #' @return An array of shape nrow(data), p giving the
 #' encoded representation of the data in p components which are
 #' also unit Frechet distributed which is to be takin into consideration for
@@ -211,6 +215,7 @@ reconstruct <- function(fit, data) {
 
 #' Print summary of a max_stable_prcomp object.
 #'
+#' @name summary.max_stable_prcomp
 #' @param object, max_stable_prcomp object. Data should be
 #' assumed to follow the same distribution as the data used in
 #' max_stable_prcomp.

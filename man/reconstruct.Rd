@@ -21,7 +21,7 @@ also unit Frechet distributed which is to be takin into consideration for
 further analysis.
 }
 \description{
-Turn the data to the reconstruction 
+Map the data to the reconstruction
 given by the fit of the max_stable_prcomp function.
 This is done by taking the max-matrix product of the data
 and the reconstruction matrix from the fit.
@@ -45,5 +45,5 @@ compr <- compress(maxPCA, dat)
 rec <- reconstruct(maxPCA, compr)
 }
 \seealso{
-[maxstablePCA::max_stable_prcomp(), maxstablePCA::maxmatmul()]
+\code{\link[=max_stable_prcomp(), maxmatmul]{max_stable_prcomp(), maxmatmul()}}
 }
