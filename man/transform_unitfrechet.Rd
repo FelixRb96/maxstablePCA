@@ -28,7 +28,7 @@ boxplot(transformed_dat)
 plot(stats::ecdf(transformed_dat))
 }
 \seealso{
-[maxstablePCA::max_stable_prcomp(), maxstablePCA::transform_orig_margins(), mev::fit.gev())] for information about why to transform data.
+\code{\link[=max_stable_prcomp]{max_stable_prcomp()}}, \code{\link[=transform_orig_margins]{transform_orig_margins()}}, [mev::fit.gev())] for information about why to transform data.
 
-[maxstablePCA::max_stable_prcomp(), maxstablePCA::transform_orig_margins(), mev::fit.gev())]: R:maxstablePCA::max_stable_prcomp(),\%20maxstablePCA::transform_orig_margins(),\%20mev::fit.gev())
+[mev::fit.gev())]: R:mev::fit.gev())
 }

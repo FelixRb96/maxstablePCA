@@ -11,7 +11,7 @@
 #' @param data, array or vector with the data which columns are to be transformed
 #' @return array or vector of same shape and type as data with the transformed data with unit
 #' Frechet margins-
-#' @seealso [maxstablePCA::max_stable_prcomp(), maxstablePCA::transform_orig_margins(), mev::fit.gev())] for information about why to transform data. 
+#' @seealso [max_stable_prcomp()], [transform_orig_margins()], [mev::fit.gev())] for information about why to transform data. 
 #' @export
 #' @examples
 #' # sample some data
@@ -57,7 +57,7 @@ transform_unitfrechet <- function(data) {
 #' @param data, array or vector with the data which columns are to be transformed
 #' @return array or vector of same shape and type as data with the transformed data with unit
 #' Frechet margins-
-#' @seealso [maxstablePCA::max_stable_prcomp(), maxstablePCA::transform_orig_margins(), mev::fit.gev())] for information about why to transform data. 
+#' @seealso [max_stable_prcomp()], [transform_orig_margins()], [mev::fit.gev())] for information about why to transform data. 
 #' @export
 #' @examples
 #' # sample some data
