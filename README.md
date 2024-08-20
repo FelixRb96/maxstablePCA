@@ -1,5 +1,5 @@
 [![R build
-status](https://github.com/FelixRb96/maxstablePCA/workflows/R-CMD-check/badge.svg)](https://github.com/FelixRb96/maxstablePCA/actions?workflow=R-CMD-check)
+status](https://github.com/FelixRb96/maxstablePCA/workflows/R-CMD-check/badge.svg)](https://github.com/FelixRb96/maxstablePCA/actions?workflow=R-CMD-check.yaml)
 
 # maxstablePCA
 
