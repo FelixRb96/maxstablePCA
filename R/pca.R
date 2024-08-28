@@ -6,8 +6,8 @@
 #' by a distance minimization approach. Can be used to check if the data
 #' follows approximately a generalized max-linear model.
 #' For details on the statistical procedure it is advised to
-#'consult the articles "F. Reinbott, A. Janßen, Principal component analysis for max-stable distributions (to appear)"
-#' and "M.Schlather F. Reinbott, A semi-group approach to Principal Component Analysis (2021)". 
+#' consult the articles "F. Reinbott, A. Janßen, Principal component analysis for max-stable distributions (https://arxiv.org/abs/2408.10650)"
+#' and "M.Schlather F. Reinbott, A semi-group approach to Principal Component Analysis (https://arxiv.org/abs/2112.04026)". 
 #'
 #' @name max_stable_prcomp
 #' @param data, array or data.frame of n observations of d variables
@@ -220,14 +220,11 @@ reconstruct <- function(fit, data) {
 #' assumed to follow the same distribution as the data used in
 #' max_stable_prcomp.
 #' @param ... additional unused arguments.
+#' @return Same as [base::print()].
+#' @seealso [max_stable_prcomp()]
 #' @export
-#' @examples
-#' # Alternatively call via the generic function summary
-#' # TODO: generic fit example
-#' # summary.max_stable_prcomp(fit)
 summary.max_stable_prcomp <- function(object, ...) {
   print(object)
-
 }
 
 # --- internal functions to solve minimization problem ---

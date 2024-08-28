@@ -40,8 +40,8 @@ Find an optimal encoding of data of extremes using max-linear combinations
 by a distance minimization approach. Can be used to check if the data
 follows approximately a generalized max-linear model.
 For details on the statistical procedure it is advised to
-consult the articles "F. Reinbott, A. Janßen, Principal component analysis for max-stable distributions (to appear)"
-and "M.Schlather F. Reinbott, A semi-group approach to Principal Component Analysis (2021)".
+consult the articles "F. Reinbott, A. Janßen, Principal component analysis for max-stable distributions (https://arxiv.org/abs/2408.10650)"
+and "M.Schlather F. Reinbott, A semi-group approach to Principal Component Analysis (https://arxiv.org/abs/2112.04026)".
 }
 \examples{
 # generate some data with the desired margins

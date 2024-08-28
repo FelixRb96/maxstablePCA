@@ -13,11 +13,12 @@ max_stable_prcomp.}
 
 \item{...}{additional unused arguments.}
 }
+\value{
+Same as \code{\link[base:print]{base::print()}}.
+}
 \description{
 Print summary of a max_stable_prcomp object.
 }
-\examples{
-# Alternatively call via the generic function summary
-# TODO: generic fit example
-# summary.max_stable_prcomp(fit)
+\seealso{
+\code{\link[=max_stable_prcomp]{max_stable_prcomp()}}
 }
