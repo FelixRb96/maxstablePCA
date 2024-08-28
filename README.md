@@ -22,5 +22,6 @@ For a better feeling of what this algorithm does, please consider looking at the
 
 ### References
 
+* Principal component analysis for max-stable distributions, Reinbott F., Janßen A. , arxiv preprint, https://arxiv.org/abs/2408.10650
 * A semi-group approach to Principal Component Analysis, Schlather M., Reinbott F., arxiv preprint, https://arxiv.org/pdf/2112.04026.pdf, 2021
 
