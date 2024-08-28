@@ -1,7 +1,7 @@
-Title: A Package for a PCA Like Procedure Suited for Multivariate Extreme Value Distributions
+Title: Apply a PCA Like Procedure Suited for Multivariate Extreme Value Distributions
 Package: maxstablePCA
 Type: Package
-Description: Dimension reduction for multivariate data of extreme events with a PCA like procedure. Tools for necessary transformations of the data are provided. 
+Description: Dimension reduction for multivariate data of extreme events with a PCA like procedure as described in Reinbott, Janßen, (2024), https://arxiv.org/abs/2408.10650. Tools for necessary transformations of the data are provided.
 Version: 0.1.0
 Maintainer: Felix Reinbott <felix.reinbott@ovgu.de>
 Authors@R: c(person("Felix", "Reinbott",
