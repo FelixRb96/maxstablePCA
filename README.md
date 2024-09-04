@@ -15,10 +15,8 @@ obtain a resonable compact description of the data.
 
 ### Examples on simulated and real world data
 
-For a better feeling of what this algorithm does, please consider looking at the following links providing example data analyses and simulation studies
-
-* Related GitHub repository: https://github.com/FelixRb96/maxstablePCA_examples
-* TODO: Rdocumentation, maybe some towardsdatascience blog or sth. 
+For a better feeling of what this algorithm does, please consider looking at the following repo, providing example data analyses and simulation studies
+https://github.com/FelixRb96/maxstablePCA_examples. 
 
 ### References
 
