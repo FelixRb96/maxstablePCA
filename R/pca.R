@@ -47,7 +47,7 @@
 #' compr <- compress(maxPCA, dat)
 #' 
 #' # For visual examination reconstruct original vector from compressed representation
-#' rec <- reconstruct(maxPCA, compr)
+#' rec <- reconstruct(maxPCA, dat)
 max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, norm = "l1", ...) {
 
   dat <- as.matrix(data)
@@ -208,7 +208,7 @@ compress <- function(fit, data) {
 #' compr <- compress(maxPCA, dat)
 #' 
 #' # For visual examination reconstruct original vector from compressed representation
-#' rec <- reconstruct(maxPCA, compr)
+#' rec <- reconstruct(maxPCA, dat)
 reconstruct <- function(fit, data) {
   return(t(maxmatmul(fit$reconstr_matrix, t(data))))
 }

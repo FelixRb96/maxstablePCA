@@ -26,7 +26,6 @@ recv <- reconstruct(maxstabPCA, sampzv)
 
 
 
-# TODO: make useful tests
 test_that("Testing max-PCA and setup functions", {
   
   # dimension checks

@@ -42,7 +42,7 @@ summary(maxPCA)
 compr <- compress(maxPCA, dat)
 
 # For visual examination reconstruct original vector from compressed representation
-rec <- reconstruct(maxPCA, compr)
+rec <- reconstruct(maxPCA, dat)
 }
 \seealso{
 \code{\link[=max_stable_prcomp]{max_stable_prcomp()}}, \code{\link[=maxmatmul]{maxmatmul()}}
