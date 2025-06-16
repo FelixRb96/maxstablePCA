@@ -4,7 +4,15 @@
 \alias{max_stable_prcomp}
 \title{Calculate max-stable PCA with dimension p for given dataset}
 \usage{
-max_stable_prcomp(data, p, s = 3, n_initial_guesses = 150, norm = "l1", ...)
+max_stable_prcomp(
+  data,
+  p,
+  s = 3,
+  n_initial_guesses = 150,
+  norm = "l1",
+  optim_style = "full",
+  ...
+)
 }
 \arguments{
 \item{data, }{array or data.frame of n observations of d variables
@@ -15,14 +23,18 @@ reconstruct this dataset with a rank p approximation.}
 the dimension of the encoded state, i.e. the number of max-linear
 combinations in the compressed representation.}
 
-\item{s}{(default = 3), numeric greater than 0. Hyperparameter for the
-stable tail dependence estimator used in tn the calculation.}
+\item{s}{(default = 3), numeric greater than 0. Hyperparameter for the}
 
 \item{n_initial_guesses}{number of guesses to choose a valid initial value
 for optimization from. This procedure uses a pseudo random number generator so
-setting a seed is necessary for reproducibility.}
+setting a seed is necessary for reproducibility.
+stable tail dependence estimator used in tn the calculation.}
 
 \item{norm}{(delfault "l1") which norm to use for the spectral measure estimator, currently only l1 and sup norm "linfty" are available.}
+
+\item{optim_style}{(delfault "full") choose between two different optimization strategies. The default being "full" that optimizes both matrices simultaneously.
+the other choice "alternating" fixes one matrix then optimizes the other matrix until converged, then optimizes the other matrix in the same style. This can lead to
+more accurate results in some cases.}
 
 \item{...}{additional parameters passed to \code{link{nloptr::slsqp()}}}
 }

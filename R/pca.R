@@ -16,10 +16,10 @@
 #' @param p, integer between 1 and ncol(data). Determines
 #' the dimension of the encoded state, i.e. the number of max-linear
 #' combinations in the compressed representation.
+#' @param s (default = 3), numeric greater than 0. Hyperparameter for the
 #' @param n_initial_guesses number of guesses to choose a valid initial value 
 #' for optimization from. This procedure uses a pseudo random number generator so 
 #' setting a seed is necessary for reproducibility. 
-#' @param s (default = 3), numeric greater than 0. Hyperparameter for the
 #' stable tail dependence estimator used in tn the calculation.
 #' @param norm (delfault "l1") which norm to use for the spectral measure estimator, currently only l1 and sup norm "linfty" are available. 
 #' @param optim_style (delfault "full") choose between two different optimization strategies. The default being "full" that optimizes both matrices simultaneously. 
