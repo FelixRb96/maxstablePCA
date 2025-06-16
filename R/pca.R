@@ -22,6 +22,9 @@
 #' @param s (default = 3), numeric greater than 0. Hyperparameter for the
 #' stable tail dependence estimator used in tn the calculation.
 #' @param norm (delfault "l1") which norm to use for the spectral measure estimator, currently only l1 and sup norm "linfty" are available. 
+#' @param optim_style (delfault "full") choose between two different optimization strategies. The default being "full" that optimizes both matrices simultaneously. 
+#' the other choice "alternating" fixes one matrix then optimizes the other matrix until converged, then optimizes the other matrix in the same style. This can lead to 
+#' more accurate results in some cases. 
 #' @param ... additional parameters passed to \code{link{nloptr::slsqp()}}
 #' @return object of class max_stable_prcomp with slots
 #' p, inserted value of dimension,
@@ -48,7 +51,7 @@
 #' 
 #' # For visual examination reconstruct original vector from compressed representation
 #' rec <- reconstruct(maxPCA, dat)
-max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, norm = "l1", ...) {
+max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, norm = "l1", optim_style = "full", ...) {
 
   dat <- as.matrix(data)
   
@@ -96,20 +99,64 @@ max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, norm = "l
       }
     }
 
-  # run slsqp
-  optimizer_result <- nloptr::slsqp(
-    x0, 
-    target_fn, 
-    lower = rep(0, 2 * d * p), 
-    upper = c(rep(d - p + 1, d * p), rep(1, d * p)), 
-    ...
-  )
+  if(optim_style == "full") {
+    # run slsqp
+    optimizer_result <- nloptr::slsqp(
+                                      x0, 
+                                      target_fn, 
+                                      lower = rep(0, 2 * d * p), 
+                                      upper = c(rep(d - p + 1, d * p), rep(1, d * p)), 
+                                      ...
+    )
 
   # set up the necessary matrices and objects for the return value
   encoder_matrix <- matrix(optimizer_result$par[(d*p + 1):(2 * d * p)], p, d)
   decoder_matrix <- matrix(optimizer_result$par[1:(d*p)], d, p)
 
   reconstr_matrix <- maxmatmul(decoder_matrix, encoder_matrix)
+  loss_value <- optimizer_result$value 
+  convergence <- optimizer_result$convergence
+  }
+
+  if(optim_style == "alternating") {
+    x <- x0
+    message("Using alternating optimization")
+
+    for(i in 1:20) {
+      tf1 <- function(z) target_fn(c(z, x[(d * p + 1):(2 * d * p)]))
+      tmp <- nloptr::slsqp(
+                           x[1:(d * p)], 
+                           tf1, 
+                           lower = rep(0, d * p), 
+                           upper = rep(d - p + 1, d * p), 
+                           ...
+      )
+      x[1:(d * p)] <- tmp$par
+      if(tmp$convergence <= 0) warning("Warning: optimizer has not converged!")
+
+      tf2 <- function(z) target_fn(c(x[1:(d * p)], z))
+      tmp <- nloptr::slsqp(
+                           x[(d * p + 1 ):(2 * d * p)], 
+                           tf2, 
+                           lower = rep(0, d * p), 
+                           upper = rep(1, d * p), 
+                           ...
+      )
+      if(tmp$convergence <= 0) warning("Warning: optimizer has not converged!")
+      x[(d * p + 1):(2 * d * p)] <- tmp$par
+
+    }
+
+    # set up the necessary matrices and objects for the return value
+    encoder_matrix <- matrix(x[(d*p + 1):(2 * d * p)], p, d)
+    decoder_matrix <- matrix(x[1:(d*p)], d, p)
+
+    reconstr_matrix <- maxmatmul(decoder_matrix, encoder_matrix)
+    loss_value <- tmp$value
+    convergence <- 1
+
+
+  }
 
   result <- list(
                  p = p,
@@ -117,8 +164,8 @@ max_stable_prcomp <- function(data, p, s = 3, n_initial_guesses = 150, norm = "l
                  decoder_matrix = decoder_matrix,
                  encoder_matrix = encoder_matrix,
                  reconstr_matrix = reconstr_matrix,
-                 loss_fctn_value = optimizer_result$value,
-                 optim_conv_status = optimizer_result$convergence,
+                 loss_fctn_value = loss_value,
+                 optim_conv_status = convergence,
                  s = s, 
                  starting_vals = list(
                                       decoder_matrix_x0 = matrix(x0[1:(d * p)], d, p), 
